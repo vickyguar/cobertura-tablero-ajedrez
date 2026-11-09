@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LP2_TP2021___Guarnieri___Velloso.Properties {
+namespace CoberturaTableroAjedrez.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace LP2_TP2021___Guarnieri___Velloso.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LP2_TP2021___Guarnieri___Velloso.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CoberturaTableroAjedrez.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

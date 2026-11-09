@@ -6,11 +6,8 @@
 //  Original author: vguar
 ///////////////////////////////////////////////////////////
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Drawing;
+namespace CoberturaTableroAjedrez.Dominio;
+
 public class Casilla
 {
     #region ATRIBUTOS
@@ -19,7 +16,7 @@ public class Casilla
     /// <summary>
     /// <see cref="Color"/> de la <see cref="Casilla"/>.
     /// </summary>
-    public eColor Colour;
+    public ColorCasilla Colour;
 
     /// <summary>
     /// <see cref="Ficha"/> que tiene la <see cref="Casilla"/>.
@@ -81,7 +78,7 @@ public class Casilla
 
     public uint GetFila() { return Fila; }
 
-    public eColor GetColor() { return Colour; }
+    public ColorCasilla GetColor() { return Colour; }
     public bool GetAtacadaFatalmente() { return AtacadaFatalmente; }
 
     #endregion

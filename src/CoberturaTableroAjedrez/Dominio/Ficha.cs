@@ -10,10 +10,19 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;*/
+using System;
 using System.Drawing;
+using System.IO;
+
+namespace CoberturaTableroAjedrez.Dominio;
 
 public abstract class Ficha
 {
+    internal static Image LoadImage(string fileName)
+    {
+        return Image.FromFile(Path.Combine(AppContext.BaseDirectory, "Recursos", "Piezas", fileName));
+    }
+
     #region ATRIBUTOS
 
     /// <summary>
@@ -40,7 +49,7 @@ public abstract class Ficha
     /// Constructor de la clase <see cref="Ficha"/>.
     /// </summary>
     /// <param name="_Name"></param>
-    virtual public Ficha(string _Name, Image _Imagen)
+    public Ficha(string _Name, Image _Imagen)
     {
         Name = _Name;
         fila = -1;
@@ -77,7 +86,7 @@ public abstract class Ficha
         uint i = Pos.GetFila() + 1;
         bool stop = false;
 
-        while (i < Global.N_ && j < Global.N_)
+        while (i < ConfiguracionTablero.Dimension && j < ConfiguracionTablero.Dimension)
         {
             Ataque.Matriz[i, j].SetAtacada(true); //Atacamos levemente
 
@@ -104,7 +113,7 @@ public abstract class Ficha
         int i = (int)Pos.GetFila() - 1;
         bool stop = false;
 
-        while (i >= 0 && j < Global.N_)
+        while (i >= 0 && j < ConfiguracionTablero.Dimension)
         {
             Ataque.Matriz[i, j].SetAtacada(true); //Atacamos levemente
 
@@ -158,7 +167,7 @@ public abstract class Ficha
         uint i = Pos.GetFila() + 1;
         bool stop = false;
 
-        while (i < Global.N_ && j >= 0)
+        while (i < ConfiguracionTablero.Dimension && j >= 0)
         {
             Ataque.Matriz[i, j].SetAtacada(true); //Atacamos levemente
 
@@ -185,7 +194,7 @@ public abstract class Ficha
         uint i = Pos.GetFila();
         bool stop = false;
 
-        while (j < Global.N_)
+        while (j < ConfiguracionTablero.Dimension)
         {
             Ataque.Matriz[i, j].SetAtacada(true); //Atacamos levemente
 
@@ -237,7 +246,7 @@ public abstract class Ficha
         uint i = Pos.GetFila() + 1;
         bool stop = false;
 
-        while (i < Global.N_)
+        while (i < ConfiguracionTablero.Dimension)
         {
             Ataque.Matriz[i, j].SetAtacada(true); //Atacamos levemente
 

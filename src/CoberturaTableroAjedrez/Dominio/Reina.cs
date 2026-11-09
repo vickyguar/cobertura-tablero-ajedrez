@@ -6,11 +6,7 @@
 //  Original author: vguar
 ///////////////////////////////////////////////////////////
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Drawing;
+namespace CoberturaTableroAjedrez.Dominio;
 
 public class Reina : Ficha
 {
@@ -21,7 +17,7 @@ public class Reina : Ficha
     /// Constructor de la clase <see cref="Reina"/>.
     /// </summary>
     /// <param name="_Nombre"></param>
-    public Reina(string _Nombre) : base(_Nombre, Image.FromFile("Reina.png"))
+    public Reina(string _Nombre) : base(_Nombre, LoadImage("Reina.png"))
     {
 
     }

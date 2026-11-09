@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LP2 TP2021 - Guarnieri - Velloso", "LP2 TP2021 - Guarnieri - Velloso\LP2 TP2021 - Guarnieri - Velloso.csproj", "{5B0D4A61-B9B7-4538-97DA-880FFA72B131}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoberturaTableroAjedrez", "src\CoberturaTableroAjedrez\CoberturaTableroAjedrez.csproj", "{5B0D4A61-B9B7-4538-97DA-880FFA72B131}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

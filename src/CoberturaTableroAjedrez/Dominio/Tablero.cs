@@ -13,23 +13,25 @@ using System.Collections.Generic;
 using System.Diagnostics;
 //using System.Drawing.Drawing2D;
 
+namespace CoberturaTableroAjedrez.Dominio;
+
 /// <summary>
 /// Enum para definir el Color de las Casillas.
 /// </summary>
-public enum eColor : int
+public enum ColorCasilla : int
 {
     BLANCO = 0,
     NEGRO
 
-} //end eColor
+} //end ColorCasilla
 
-public enum TipoSolucion : int
+public enum TipoCobertura : int
 {
     NO_SOLUCION = 0,
     LEVE,
     FATAL
 
-} //end TipoSolucion
+} //end TipoCobertura
 
 public class Tablero
 {
@@ -38,18 +40,18 @@ public class Tablero
     /// <summary>
     /// Matriz de Casillas del <see cref="Tablero"/>.
     /// </summary>
-    public Casilla[,] Matriz = new Casilla[Global.N_, Global.N_]; //Acceso publico, para que las fichas se puedan posicionar y atacar
+    public Casilla[,] Matriz = new Casilla[ConfiguracionTablero.Dimension, ConfiguracionTablero.Dimension]; //Acceso publico, para que las fichas se puedan posicionar y atacar
 
     /// <summary>
     /// Pila de Fichas (se llena a medida que se posicionan las Ficha) del <see cref="Tablero"/>.
     /// </summary>
-    private Stack<Ficha> PilaPosicionadas = new Stack<Ficha>(Global.N_);
+    private Stack<Ficha> PilaPosicionadas = new Stack<Ficha>(ConfiguracionTablero.Dimension);
 
     /// <summary>
     /// ID de <see cref="Tablero"/>
     /// </summary>
     private int ID;
-    private TipoSolucion type;
+    private TipoCobertura type;
 
     #endregion
 
@@ -61,17 +63,17 @@ public class Tablero
     public Tablero(int _ID)
     {
         //Creamos la matriz de Casillas (tiempo n^2, fors anidados)
-        for (uint i = 0; i < Global.N_; ++i)
+        for (uint i = 0; i < ConfiguracionTablero.Dimension; ++i)
         {
-            for (uint j = 0; j < Global.N_; ++j)
+            for (uint j = 0; j < ConfiguracionTablero.Dimension; ++j)
             {
                 Matriz[i, j] = new Casilla(i, j);
             }
         }
 
         ID = _ID;
-        Type = TipoSolucion.NO_SOLUCION;
-        LeerArchivo(); //Inicializamos los colores del Tablero
+        Type = TipoCobertura.NO_SOLUCION;
+        CargarColores(); //Inicializamos los colores del Tablero
     }
 
     /// <summary>
@@ -81,30 +83,27 @@ public class Tablero
     public Tablero(Tablero newTablero, int _ID)
     {
         //Matriz = newTablero.Matriz; //TODO: preguntar si esto es válido
-        for (int i = 0; i < Global.N_; ++i)
+        for (int i = 0; i < ConfiguracionTablero.Dimension; ++i)
         {
-            for (int j = 0; j < Global.N_; ++j)
+            for (int j = 0; j < ConfiguracionTablero.Dimension; ++j)
             {
-                Matriz[i, j] = newTablero.Matriz[i, j];
-                Matriz[i, j].Colour = newTablero.Matriz[i, j].Colour;
-                Matriz[i, j].Fichita = newTablero.Matriz[i, j].Fichita;
-                Matriz[i, j].SetAtacada(newTablero.Matriz[i, j].GetAtacada());
-                Matriz[i, j].SetColumna(newTablero.Matriz[i, j].GetColumna());
-                Matriz[i, j].SetFila(newTablero.Matriz[i, j].GetFila());
-                Matriz[i, j].SetOcupada(newTablero.Matriz[i, j].GetOcupada());
+                Casilla casillaOriginal = newTablero.Matriz[i, j];
+                Casilla casillaCopia = new Casilla(casillaOriginal.GetFila(), casillaOriginal.GetColumna())
+                {
+                    Colour = casillaOriginal.Colour,
+                    Fichita = casillaOriginal.Fichita
+                };
+                casillaCopia.SetAtacada(casillaOriginal.GetAtacada());
+                casillaCopia.SetAtacadaFatalmente(casillaOriginal.GetAtacadaFatalmente());
+                casillaCopia.SetOcupada(casillaOriginal.GetOcupada());
+                Matriz[i, j] = casillaCopia;
             }
         }
 
-        Ficha[] Aux = newTablero.PilaPosicionadas.ToArray();
-
-        for (int i = 7; i >= 0; --i)
-        {
-            PilaPosicionadas.Push(Aux[i]);
-        }
-
-        PilaPosicionadas = new Stack<Ficha>(new Stack<Ficha>(newTablero.PilaPosicionadas)); //TODO: si falla algo es ACA TAMBIEN
+        PilaPosicionadas = new Stack<Ficha>(new Stack<Ficha>(newTablero.PilaPosicionadas));
 
         ID = _ID;
+        Type = newTablero.Type;
     }
 
     /// <summary>
@@ -122,15 +121,15 @@ public class Tablero
     /// <summary>
     /// Leemos el archivo con 1's y 0's para determinar el color de las Casillas del Tablero this.
     /// </summary>
-    private void LeerArchivo()
+    private void CargarColores()
     {
-        string[] lines = System.IO.File.ReadAllLines("ColoresTablero.txt"); //Leo el archivo de colores
+        string[] lines = System.IO.File.ReadAllLines(System.IO.Path.Combine(AppContext.BaseDirectory, "Recursos", "ColoresTablero.txt"));
         int j = 0;
 
         foreach (string line in lines) //para cada linea
         {
             for (int i = 0; i < line.Length; i++)//recorro los caracteres de cada linea
-                Matriz[j, i].Colour = line[i] == '0' ? eColor.BLANCO : eColor.NEGRO; //le asigno el color a cada casilla
+                Matriz[j, i].Colour = line[i] == '0' ? ColorCasilla.BLANCO : ColorCasilla.NEGRO; //le asigno el color a cada casilla
 
             j++;
         }
@@ -168,11 +167,12 @@ public class Tablero
     /// </summary>
     public void Limpiar()
     {
-        for (uint i = 0; i < Global.N_; i++)
+        for (uint i = 0; i < ConfiguracionTablero.Dimension; i++)
         {
-            for (uint j = 0; j < Global.N_; j++)
+            for (uint j = 0; j < ConfiguracionTablero.Dimension; j++)
             {
                 Matriz[i, j].SetAtacada(false);
+                Matriz[i, j].SetAtacadaFatalmente(false);
                 Matriz[i, j].SetFicha(null);
                 Matriz[i, j].SetOcupada(false);
             }
@@ -202,19 +202,12 @@ public class Tablero
         if (Fichita.GetName() == "Alfil2") //si estamos posicionando el segundo alfil
         {
             Ficha FichaAux = PilaPosicionadas.Peek(); //el ultimo (antes de posicionar el alfil 2) simpre es Alfil1
-            try
+            while (Matriz[i, j].GetColor() == Buscar(FichaAux).GetColor()) //Mientras los dos alfiles sean del mismo color
             {
-                while (Matriz[i, j].GetColor() == Buscar(FichaAux).GetColor()) //Mientras los dos alfiles sean del mismo color
-                {
-                    index = r.Next(SubLista.Count); //Elegimos un índice random de la SubLista 
+                index = r.Next(SubLista.Count); //Elegimos un índice random de la SubLista
 
-                    i = SubLista[index].GetFila(); //nos guardamos nuevamente la fila
-                    j = SubLista[index].GetColumna(); //nos guardamos nuevamente la columna
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                i = SubLista[index].GetFila(); //nos guardamos nuevamente la fila
+                j = SubLista[index].GetColumna(); //nos guardamos nuevamente la columna
             }
         }
 
@@ -239,10 +232,10 @@ public class Tablero
     /// </summary>
     public void ImprimirOutput()
     {
-        for (uint i = 0; i < Global.N_; ++i)
+        for (uint i = 0; i < ConfiguracionTablero.Dimension; ++i)
         {
             Debug.Write("|");
-            for (uint j = 0; j < Global.N_; ++j)
+            for (uint j = 0; j < ConfiguracionTablero.Dimension; ++j)
             {
                 if (Matriz[i, j].Fichita == null)
                 {
@@ -279,11 +272,11 @@ public class Tablero
     /// <returns></returns>
     public void Rotar90()
     {
-        int N = Global.N_ - 1;
+        int N = ConfiguracionTablero.Dimension - 1;
 
-        for (int i = 0; i < Global.N_ / 2; i++)
+        for (int i = 0; i < ConfiguracionTablero.Dimension / 2; i++)
         {
-            for (int j = i; j < Global.N_ - i - 1; j++)
+            for (int j = i; j < ConfiguracionTablero.Dimension - i - 1; j++)
             {
                 Casilla aux = Matriz[i, j]; //Variable auxiliar
 
@@ -327,29 +320,28 @@ public class Tablero
     /// <returns></returns>
     public Tablero Espejar(Tablero Espejar)
     {
-        Ficha aux;
-
-        for (int i = 0; i < Global.N_; ++i) //recorro fila
+        for (int i = 0; i < ConfiguracionTablero.Dimension; ++i) //recorro fila
         {
-            for (int j = 0; j < Global.N_; ++j) //recorro columna
+            for (int j = 0; j < ConfiguracionTablero.Dimension; ++j) //recorro columna
             {
-                if (Matriz[i, j].Fichita != null) //si hay una ficha en la casilla i,j
+                Casilla casillaOriginal = Matriz[i, j];
+                int columnaEspejada = ConfiguracionTablero.Dimension - 1 - j;
+                Casilla casillaEspejada = Espejar.Matriz[i, columnaEspejada];
+
+                casillaEspejada.Colour = casillaOriginal.Colour;
+                casillaEspejada.SetFicha(casillaOriginal.Fichita);
+                casillaEspejada.SetAtacada(casillaOriginal.GetAtacada());
+                casillaEspejada.SetAtacadaFatalmente(casillaOriginal.GetAtacadaFatalmente());
+                casillaEspejada.SetOcupada(casillaOriginal.GetOcupada());
+
+                if (casillaEspejada.Fichita != null)
                 {
-                    aux = Matriz[i, j].Fichita; //ficha auxiliar
-
-                    if (Matriz[i, 7 - j].Fichita != null) //si en la casilla "espejo" hay una ficha
-                    {
-                        Espejar.Matriz[i, j].SetFicha(Matriz[i, 7 - j].Fichita); //realizo el intercambio
-                        Espejar.Matriz[i, j].Fichita.Fila = i;
-                        Espejar.Matriz[i, j].Fichita.Columna = 7 - j;
-                    }
-
-                    Espejar.Matriz[i, 7 - j].SetFicha(aux);
-                    Espejar.Matriz[i, 7 - j].Fichita.Fila = i;
-                    Espejar.Matriz[i, 7 - j].Fichita.Columna = j;
+                    casillaEspejada.Fichita.Fila = i;
+                    casillaEspejada.Fichita.Columna = columnaEspejada;
                 }
             }
         }
+        Espejar.Type = Type;
         return Espejar;
 
     }
@@ -363,15 +355,8 @@ public class Tablero
     {
         Casilla T1, T2;
 
-        try
-        {
-            T1 = BuscarXNombre("Torre1");
-            T2 = BuscarXNombre("Torre2");
-        }
-        catch (Exception ex)
-        {
-            throw ex; //MessageBox
-        }
+        T1 = BuscarXNombre("Torre1");
+        T2 = BuscarXNombre("Torre2");
 
         if (T1.GetColumna() != T2.GetColumna() || T1.GetFila() != T2.GetFila())
         {
@@ -419,17 +404,17 @@ public class Tablero
     /// <returns></returns>
     public bool VerificarSolucion()
     {
-        TipoSolucion Type_ = TipoSolucion.FATAL;
+        TipoCobertura Type_ = TipoCobertura.FATAL;
 
-        for (int i = 0; i < Global.N_; i++)
+        for (int i = 0; i < ConfiguracionTablero.Dimension; i++)
         {
-            for (int j = 0; j < Global.N_; j++)
+            for (int j = 0; j < ConfiguracionTablero.Dimension; j++)
             {
                 if (!Matriz[i, j].GetAtacadaFatalmente())
-                    Type_ = TipoSolucion.LEVE;
+                    Type_ = TipoCobertura.LEVE;
                 if (!Matriz[i, j].GetAtacada())
                 {
-                    Type = TipoSolucion.NO_SOLUCION;
+                    Type = TipoCobertura.NO_SOLUCION;
                     return false;
                 }
             }
@@ -510,9 +495,9 @@ public class Tablero
             #endregion
 
             #region LO VIEJO
-            //for (int i = 0; i < Global.N_; ++i)
+            //for (int i = 0; i < ConfiguracionTablero.Dimension; ++i)
             //{
-            //    for (int j = 0; j < Global.N_; ++j)
+            //    for (int j = 0; j < ConfiguracionTablero.Dimension; ++j)
             //    {
 
             //        if (Matriz[i, j].Fichita != null) //Me fijo si en esa casilla hay ficha //ACA DICE QUE POS ES NULL!
@@ -535,7 +520,7 @@ public class Tablero
             Ficha[] _THIS = this.PilaPosicionadas.ToArray();
             Ficha[] _T = T.PilaPosicionadas.ToArray();
 
-            for (int i = 0; i < Global.N_; ++i) //TODO: si falla algo es de aca
+            for (int i = 0; i < ConfiguracionTablero.Dimension; ++i) //TODO: si falla algo es de aca
             {
                 if (_THIS[i].Columna != _T[i].Columna || _THIS[i].Fila != _T[i].Fila)
                     return true;
@@ -557,8 +542,8 @@ public class Tablero
     /// <returns></returns>
     public Casilla Buscar(Ficha Fichita)
     {
-        for (int i = 0; i < Global.N_; ++i)
-            for (int j = 0; j < Global.N_; ++j)
+        for (int i = 0; i < ConfiguracionTablero.Dimension; ++i)
+            for (int j = 0; j < ConfiguracionTablero.Dimension; ++j)
                 if (Matriz[i, j].Fichita == Fichita)
                     return Matriz[i, j];
         throw new Exception("\n----- Error en buscar: " + Fichita.GetName() + " no está en el Tablero ----- ");
@@ -571,8 +556,8 @@ public class Tablero
     /// <returns></returns>
     public Casilla BuscarXNombre(string Name)
     {
-        for (int i = 0; i < Global.N_; ++i)
-            for (int j = 0; j < Global.N_; ++j)
+        for (int i = 0; i < ConfiguracionTablero.Dimension; ++i)
+            for (int j = 0; j < ConfiguracionTablero.Dimension; ++j)
             {
                 if (Matriz[i, j].Fichita != null)
                     if (Matriz[i, j].Fichita.GetName() == Name)
@@ -585,7 +570,7 @@ public class Tablero
     #endregion
 
     #region SETTERS & GETTES
-    public TipoSolucion Type { get => type; set => type = value; }
+    public TipoCobertura Type { get => type; set => type = value; }
     #endregion
 
 } //end Tablero

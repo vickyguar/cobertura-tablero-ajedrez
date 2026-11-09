@@ -6,11 +6,7 @@
 //  Original author: vguar
 ///////////////////////////////////////////////////////////
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Drawing;
+namespace CoberturaTableroAjedrez.Dominio;
 
 public class Caballo : Ficha
 {
@@ -20,7 +16,7 @@ public class Caballo : Ficha
     /// Constructor de la clase <see cref="Caballo"/>.
     /// </summary>
     /// <param name="_Nombre"></param>
-    public Caballo(string _Nombre) : base(_Nombre, Image.FromFile("Caballo.png"))
+    public Caballo(string _Nombre) : base(_Nombre, LoadImage("Caballo.png"))
     {
 
     }
@@ -50,24 +46,24 @@ public class Caballo : Ficha
 
         if (i - 2 >= 0)
         {
-            if (j + 1 < Global.N_)
+            if (j + 1 < ConfiguracionTablero.Dimension)
                 Ataque.Matriz[i - 2, j + 1].SetAtacada(true);
 
             if (j - 1 >= 0)
                 Ataque.Matriz[i - 2, j - 1].SetAtacada(true);
         }
 
-        if (i + 2 < Global.N_)
+        if (i + 2 < ConfiguracionTablero.Dimension)
         {
             if (j - 1 >= 0)
                 Ataque.Matriz[i + 2, j - 1].SetAtacada(true);
-            if (j + 1 < Global.N_)
+            if (j + 1 < ConfiguracionTablero.Dimension)
                 Ataque.Matriz[i + 2, j + 1].SetAtacada(true);
         }
 
-        if (i + 1 < Global.N_)
+        if (i + 1 < ConfiguracionTablero.Dimension)
         {
-            if (j + 2 < Global.N_)
+            if (j + 2 < ConfiguracionTablero.Dimension)
                 Ataque.Matriz[i + 1, j + 2].SetAtacada(true);
             if (j - 2 >= 0)
                 Ataque.Matriz[i + 1, j - 2].SetAtacada(true);
@@ -77,7 +73,7 @@ public class Caballo : Ficha
         {
             if (j - 2 >= 0)
                 Ataque.Matriz[i - 1, j - 2].SetAtacada(true);
-            if (j + 2 < Global.N_)
+            if (j + 2 < ConfiguracionTablero.Dimension)
                 Ataque.Matriz[i - 1, j + 2].SetAtacada(true);
         }
     }
